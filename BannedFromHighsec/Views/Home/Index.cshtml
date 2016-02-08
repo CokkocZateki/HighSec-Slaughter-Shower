@@ -4,6 +4,22 @@
 @model BannedFromHighsec.Models.IndexViewModel
 
 <div class="container">
+
+    <!-- INFO MESSAGES -->
+    @if (TempData["UserMessage"] != null)
+    {
+        <div class="alert alert-success">
+            <strong>Success!</strong> @TempData["UserMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Error!</strong> @TempData["ErrorMessage"]
+        </div>
+    }
+
     <div class="row">
 
         <div class="col-lg-offset-3 col-lg-7">
@@ -12,18 +28,23 @@
                 @foreach (var loss in Model.highsecLosses)
                 {
                     <li class="list-group-item">
-                        <a href="@("http://zkillboard.com/kill/" + loss.KillId)">
-                            <img class="portrait" src="@("http://imageserver.eveonline.com/Character/" + loss.Victim.CharacterId + "_32.jpg")" />
-                            @loss.Victim.CharacterName
+                        <a href="@("http://zkillboard.com/kill/" + loss.killID)">
+                            <img class="portrait" src="@("http://imageserver.eveonline.com/Character/" + loss.victimID + "_32.jpg")" />
+                            @loss.victimName
 
-                            @loss.SolarSystemId <!-- Yes, probably make custom save class/list. With SystemName aswell as default data + shipname !!!! When moving to DB, This is solved-->
+                            <!-- Make horizontal space with css or something -->
+                            <!-- Add spacer, maybe | -->
+                            @loss.locationName 
 
-                            @loss.KillTime
+                            <!-- Make horizontal space with css or something -->
+                            <!-- Add spacer, maybe | -->
+
+                            @loss.killTime
 
                             <span class="pull-right">
-                                @loss.Victim.ShipTypeId <!--Hit up in DB and save name in own list, or hack other list together with it-->
-                                <img class="portrait" src="@("http://imageserver.eveonline.com/Render/" + loss.Victim.ShipTypeId + "_32.png")" />
-                                @loss.Stats.TotalValue
+                                @loss.victimShipName
+                                <img class="portrait" src="@("http://imageserver.eveonline.com/Render/" + loss.victimShipID + "_32.png")" />
+                                @(loss.victimLostIsk + " Isk") <!-- format so it looks good-->
                             </span>
                         </a>
                     </li>

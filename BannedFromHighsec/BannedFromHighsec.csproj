@@ -217,6 +217,7 @@
     </Compile>
     <Compile Include="Models\IndexViewModel.cs" />
     <Compile Include="Models\Losses.cs" />
+    <Compile Include="Models\viewLosses.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

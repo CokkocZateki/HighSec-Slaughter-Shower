@@ -8,7 +8,7 @@ namespace BannedFromHighsec.Models
     public class IndexViewModel
     {
 
-        public List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill> highsecLosses {get; set;}
+        public List<viewLosses> highsecLosses = new List<viewLosses>();
 
         public IndexViewModel()
         {
