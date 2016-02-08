@@ -13,21 +13,31 @@ namespace BannedFromHighsec.Controllers
 
         SQLiteConnection m_dbConnection;
 
-        public void CreatDB()
+        public void CreateDB()
         {
+
+            var debug = Environment.CurrentDirectory; ;
             //IF it doesn't exist create dynamic DB
-            SQLiteConnection.CreateFile("BannedFromHighSec.sqlite");
+            if (!System.IO.File.Exists("|DataDirectory|\\BannedFromHighSec.sqlite"))
+                SQLiteConnection.CreateFile("BannedFromHighSec.sqlite;");
+            else
+                return; //Database exists, don't do anything, return.
+
+            //Open connection to make tables
+            m_dbConnection = new SQLiteConnection("Data Source=|DataDirectory|\\BannedFromHighSec.sqlite;Version=3;");
+            m_dbConnection.Open();
 
             //Create table
             string sql = "create table Losses " +
-                 "(killID int, name varchar(40), finalBlow varchar(40), locationID int" +
-                 ""+
-                 ""+
-                 ""+
-                 ")"; //REDO - Add all fields I want info from. 
+                 "(killID int primary key, victimID int, victimName varchar(40), locationID int, locationName varchar(40)," +
+                 "victimShipID int, victimShipName varchar(40), VictimLostIsk int,  "+
+                 ")";
             
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
             command.ExecuteNonQuery();
+
+            //Close and exit
+            m_dbConnection.Close();
 
         }
 
@@ -35,7 +45,7 @@ namespace BannedFromHighsec.Controllers
         {
             //Update Dynamic DB with latest losses - Run every x time
             //Load in DB for sec status
-            m_dbConnection = new SQLiteConnection("Data Source=C:\\Users\\Crow\\Documents\\Visual Studio 2015\\Projects\\BannedFromHighsec\\BannedFromHighsec\\App_Data\\sqlite-latest.sqlite;Version=3;");
+            m_dbConnection = new SQLiteConnection("Data Source=|DataDirectory|\\sqlite-latest.sqlite;Version=3;");
             m_dbConnection.Open();
 
             //var highsecLosses = new Losses();
@@ -110,51 +120,56 @@ namespace BannedFromHighsec.Controllers
         public ActionResult Index()
         {
 
-            //Load in DB for sec status
-            m_dbConnection = new SQLiteConnection("Data Source=C:\\Users\\Crow\\Documents\\Visual Studio 2015\\Projects\\BannedFromHighsec\\BannedFromHighsec\\App_Data\\sqlite-latest.sqlite;Version=3;");
-            m_dbConnection.Open();
+            //Create CB
+            CreateDB();
 
-            var highsecLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
-            eZet.EveLib.ZKillboardModule.ZKillboard ZkillBoard = new eZet.EveLib.ZKillboardModule.ZKillboard();
-            eZet.EveLib.ZKillboardModule.ZKillboardOptions ZkillOptions = new eZet.EveLib.ZKillboardModule.ZKillboardOptions();
-            ZkillOptions.AllianceId.Add(99006112);
-            ZkillOptions.WSpace = false;
+            /*   //Load in DB for sec status
+               m_dbConnection = new SQLiteConnection("Data Source=C:\\Users\\Crow\\Documents\\Visual Studio 2015\\Projects\\BannedFromHighsec\\BannedFromHighsec\\App_Data\\sqlite-latest.sqlite;Version=3;");
+               m_dbConnection.Open();
 
-            //Walk pages with losses (Hardcode 5 pages for now)
-            var listLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
-            for (int i = 0; i < 5; i++)
-            {
-                ZkillOptions.Page = i;
-                var losses = ZkillBoard.GetLosses(ZkillOptions);
-                listLosses.AddRange(losses);
-            }
+               var highsecLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
+               eZet.EveLib.ZKillboardModule.ZKillboard ZkillBoard = new eZet.EveLib.ZKillboardModule.ZKillboard();
+               eZet.EveLib.ZKillboardModule.ZKillboardOptions ZkillOptions = new eZet.EveLib.ZKillboardModule.ZKillboardOptions();
+               ZkillOptions.AllianceId.Add(99006112);
+               ZkillOptions.WSpace = false;
 
-            foreach (var loss in listLosses)
-            {
-                //Lookup System status of location
-                string sql = "select security from mapSolarSystems where solarSystemID=" + loss.SolarSystemId;
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
-                SQLiteDataReader reader = command.ExecuteReader();
+               //Walk pages with losses (Hardcode 5 pages for now)
+               var listLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
+               for (int i = 0; i < 5; i++)
+               {
+                   ZkillOptions.Page = i;
+                   var losses = ZkillBoard.GetLosses(ZkillOptions);
+                   listLosses.AddRange(losses);
+               }
+
+               foreach (var loss in listLosses)
+               {
+                   //Lookup System status of location
+                   string sql = "select security from mapSolarSystems where solarSystemID=" + loss.SolarSystemId;
+                   SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                   SQLiteDataReader reader = command.ExecuteReader();
 
 
-                var rows = reader.StepCount;
-                while (reader.Read())
-                {
-                    if (reader.GetDouble(0) >= 0.5)
-                    {
-                        highsecLosses.Add(loss);
-                    }
-                }                
-            }
+                   var rows = reader.StepCount;
+                   while (reader.Read())
+                   {
+                       if (reader.GetDouble(0) >= 0.5)
+                       {
+                           highsecLosses.Add(loss);
+                       }
+                   }                
+               }
 
-            //Sort list
-            highsecLosses.Sort((s1, s2) => s1.KillTime.CompareTo(s2.KillTime));
+               //Sort list
+               highsecLosses.Sort((s1, s2) => s1.KillTime.CompareTo(s2.KillTime));
 
-            //Save in model and return to view with list
-            var model = new IndexViewModel();
-            model.highsecLosses = highsecLosses;
-            return View(model);
+               //Save in model and return to view with list
+               var model = new IndexViewModel();
+               model.highsecLosses = highsecLosses;
+
+       */  
+            return View();
+            //return View(model);
         }
-
     }
 }
