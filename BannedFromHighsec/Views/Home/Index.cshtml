@@ -22,37 +22,36 @@
 
     <div class="row">
 
-        <div class="col-lg-offset-3 col-lg-7">
-            <label>Victim</label><label>Time</label><label>Location</label><label>Ship and Isk Lost</label>
-            <ul class="list-group scrollable-menu">
+        <div class="col-lg-offset-2 col-lg-8">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fool</th>
+                        <th>Location</th>
+                        <th>Got Rekt Time</th>
+                        <th>RIP Ship</th>
+                        <th>Isk Value</th>
+                        <th>ZkillBoard</th>
+                    </tr>
+                </thead>
+                @{ int i = 1;}
                 @foreach (var loss in Model.highsecLosses)
                 {
-                    <li class="list-group-item">
-                        <a href="@("http://zkillboard.com/kill/" + loss.killID)">
-                            <img class="portrait" src="@("http://imageserver.eveonline.com/Character/" + loss.victimID + "_32.jpg")" />
-                            @loss.victimName
-
-                            <!-- Make horizontal space with css or something -->
-                            <!-- Add spacer, maybe | -->
-                            @loss.locationName 
-
-                            <!-- Make horizontal space with css or something -->
-                            <!-- Add spacer, maybe | -->
-
-                            @loss.killTime
-
-                            <span class="pull-right">
-                                @loss.victimShipName
-                                <img class="portrait" src="@("http://imageserver.eveonline.com/Render/" + loss.victimShipID + "_32.png")" />
-                                @(loss.victimLostIsk + " Isk") <!-- format so it looks good-->
-                            </span>
-                        </a>
-                    </li>
+                <tbody>
+                    <tr>
+                        <td>@i</td>
+                        <td><img class="portrait" src="@("http://imageserver.eveonline.com/Character/" + loss.victimID + "_32.jpg")" /> @loss.victimName</td>
+                        <td><a href="@("http://evemaps.dotlan.net/system/" + loss.locationName)"> @loss.locationName </a> </td>
+                        <td>@loss.killTime</td>
+                        <td><img class="portrait" src="@("http://imageserver.eveonline.com/Render/" + loss.victimShipID + "_32.png")" /> @loss.victimShipName</td>
+        <!--FORMAT-->   <td>@(loss.victimLostIsk + " Isk")</td>
+                        <td><a href="@("http://zkillboard.com/kill/" + loss.killID)"> Zkill </a></td>
+                    </tr>
+                </tbody>
+                    i++;
                 }
-            </ul>
-
-            
+            </table>            
         </div>
-
     </div>
 </div>

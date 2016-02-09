@@ -145,18 +145,11 @@ namespace BannedFromHighsec.Controllers
 
         public ActionResult Index()
         {
-
-            //Debug / Test
-            //string test = "Lincoln Loth'brok";
-            //string tset2 = test.Replace("\'", "\'\'");
-            //string test3 = test.Replace("'","''");
-
-
             //Create CB if needed
-            CreateDB();
+            //CreateDB();
 
             //Update DB
-            UpdateLosses();
+            //UpdateLosses();
 
             //Select first 20 results and save
             string app_data_path = HttpContext.Server.MapPath("~/App_Data/");
