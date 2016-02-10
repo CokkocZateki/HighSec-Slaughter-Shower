@@ -149,7 +149,7 @@ namespace BannedFromHighsec.Controllers
             CreateDB();
 
             //Update DB
-            //UpdateLosses();
+            //UpdateLosses486213795();
 
             //Select first 20 results and save
             string app_data_path = HttpContext.Server.MapPath("~/App_Data/");

@@ -1,5 +1,5 @@
 language: csharp
-solution: BannedForHighSec.sln
+solution: BannedFromHighsec.sln
 script:
-    - nuget restore BannedForHighSec.sln
-    - xbuild /p:Configuration=Release /target:BannedForHighSec BannedForHighSec.sln
+    - nuget restore BannedFromHighsec.sln
+    - xbuild /p:Configuration=Release /target:BannedFromHighsec BannedFromHighsec.sln
