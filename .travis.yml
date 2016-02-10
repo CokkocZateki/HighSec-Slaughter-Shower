@@ -1,6 +1,5 @@
 language: csharp
 solution: BannedForHighSec.sln
 script:
-    - nuget restore ssd.sln
+    - nuget restore BannedForHighSec.sln
     - xbuild /p:Configuration=Release /target:BannedForHighSec BannedForHighSec.sln
-	
