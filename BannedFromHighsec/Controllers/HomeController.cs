@@ -64,7 +64,7 @@ namespace BannedFromHighsec.Controllers
             //Walk pages with losses (Hardcode 5 pages for now)
             var listLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 8; i++)
             {
                 ZkillOptions.Page = i;
                 var losses = ZkillBoard.GetLosses(ZkillOptions);

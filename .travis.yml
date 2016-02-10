@@ -1,4 +1,4 @@
-language: csharp
+language: CSharp
 solution: BannedFromHighsec.sln
 script:
     - nuget restore BannedFromHighsec.sln
