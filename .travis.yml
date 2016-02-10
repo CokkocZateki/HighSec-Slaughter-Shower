@@ -1,6 +1,6 @@
 language: csharp
-solution: HighSec-Slaughter-Shower.sln
+solution: BannedForHighSec.sln
 script:
-	- nuget restore ssd.sln
-	- xbuild /p:Configuration=Release /target:HighSec-Slaughter-Shower HighSec-Slaughter-Shower.sln
+    - nuget restore ssd.sln
+    - xbuild /p:Configuration=Release /target:BannedForHighSec BannedForHighSec.sln
 	
