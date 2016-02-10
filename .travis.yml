@@ -1,0 +1,6 @@
+language: csharp
+solution: HighSec-Slaughter-Shower.sln
+script:
+	- nuget restore ssd.sln
+	- xbuild /p:Configuration=Release /target:HighSec-Slaughter-Shower HighSec-Slaughter-Shower.sln
+	
