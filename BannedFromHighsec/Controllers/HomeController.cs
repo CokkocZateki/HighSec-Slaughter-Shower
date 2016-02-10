@@ -46,7 +46,7 @@ namespace BannedFromHighsec.Controllers
             }
         }
 
-        public void UpdateLosses()
+        public void UpdateLosses486213795()
         {
             //Update Dynamic DB with latest losses - Run every x time
             //Load in DB for sec status
@@ -146,7 +146,7 @@ namespace BannedFromHighsec.Controllers
         public ActionResult Index()
         {
             //Create CB if needed
-            //CreateDB();
+            CreateDB();
 
             //Update DB
             //UpdateLosses();
