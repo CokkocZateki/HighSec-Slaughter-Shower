@@ -2,4 +2,4 @@ language: CSharp
 solution: BannedFromHighsec.sln
 script:
     - nuget restore BannedFromHighsec.sln
-    - xbuild /p:Configuration=Release /target:BannedFromHighsec BannedFromHighsec.sln
+    - xbuild /p:Configuration=Release /target:BannedFromHighsec BannedFromHighsec.sln /p:TargetFrameworkVersion="v4.5"
