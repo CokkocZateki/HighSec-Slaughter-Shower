@@ -12,6 +12,7 @@ namespace BannedFromHighsec.Controllers
     {
 
         SQLiteConnection m_dbConnection;
+        SQLiteConnection m_dbConnection_Update;
 
         public void CreateDB()
         {
@@ -51,43 +52,59 @@ namespace BannedFromHighsec.Controllers
             //Update Dynamic DB with latest losses - Run every x time
             //Load in DB for sec status
             string app_data_path = HttpContext.Server.MapPath("~/App_Data/");
-            m_dbConnection = new SQLiteConnection("Data Source=" + app_data_path + "sqlite-latest.sqlite;Version=3;");
+            m_dbConnection_Update = new SQLiteConnection("Data Source=" + app_data_path + "sqlite-latest.sqlite;Version=3;");
 
             //var highsecLosses = new Losses();
             var tempSystemName = new List<string>();
 
             eZet.EveLib.ZKillboardModule.ZKillboard ZkillBoard = new eZet.EveLib.ZKillboardModule.ZKillboard();
             eZet.EveLib.ZKillboardModule.ZKillboardOptions ZkillOptions = new eZet.EveLib.ZKillboardModule.ZKillboardOptions();
-            ZkillOptions.AllianceId.Add(99006112);
-            ZkillOptions.WSpace = false;
+            ZkillOptions.PastSeconds = 1200;
+            ZkillOptions.CorporationId.Add(98011392); //Insrt
+            ZkillOptions.CorporationId.Add(98224068); //Baers
+            //ZkillOptions.AllianceId.Add(99006112); //Friendly Probes
+            //ZkillOptions.WSpace = false;
 
-            //Walk pages with losses (Hardcode 5 pages for now)
+            //Cron job runs every 15 min. only get kills for last 20min (20 to add buffer). 
             var listLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
+            var losses = ZkillBoard.GetLosses(ZkillOptions);
+            listLosses.AddRange(losses);
 
-            for (int i = 0; i < 8; i++)
+            //If we happen to have more than 200 request we walk though the rest pages here. ###### Check if this actually works as intended ######
+            int i = 2;
+            while (losses.Count > 0)
             {
                 ZkillOptions.Page = i;
-                var losses = ZkillBoard.GetLosses(ZkillOptions);
+                losses = ZkillBoard.GetLosses(ZkillOptions);
                 listLosses.AddRange(losses);
+                i++;
             }
+            
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    ZkillOptions.Page = i;
+            //    var losses = ZkillBoard.GetLosses(ZkillOptions);
+            //    listLosses.AddRange(losses);
+            //}
 
 
             //Temp list to hold data before db insertion
             var tempLosses = new List<viewLosses>();
-            
-            
+
+
             //Open database and make readings
-            m_dbConnection.Open();
+            m_dbConnection_Update.Open();
             foreach (var loss in listLosses)
             {
                 //Lookup System status of location
                 string sql = "select security, solarSystemName from mapSolarSystems where solarSystemID=" + loss.SolarSystemId;
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection_Update);
                 SQLiteDataReader reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    if (reader.GetDouble(0) >= 0.5)
+                    double secStatus = reader.GetDouble(0);
+                    if (secStatus >= 0.5)
                     {
                         tempLosses.Add(new viewLosses(loss.KillId, loss.KillTime, loss.Victim.CharacterId, loss.Victim.CharacterName, loss.SolarSystemId, reader.GetString(1), loss.Victim.ShipTypeId, (long)loss.Stats.TotalValue));
                     }
@@ -98,7 +115,7 @@ namespace BannedFromHighsec.Controllers
             {
                 //Lookup ShipName
                 string sql = "select typeName from invTypes where typeId=" + loss.victimShipID;
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection_Update);
                 SQLiteDataReader reader = command.ExecuteReader();
 
                 //Get Result
@@ -110,11 +127,11 @@ namespace BannedFromHighsec.Controllers
 
             //Close old DB connection and open dynamic DB and paste info in
 
-            m_dbConnection.Close();
+            m_dbConnection_Update.Close();
 
             //Open own database
-            m_dbConnection = new SQLiteConnection("Data Source=" + app_data_path + "BannedFromHighSec.sqlite;Version=3;");
-            m_dbConnection.Open();
+            m_dbConnection_Update = new SQLiteConnection("Data Source=" + app_data_path + "BannedFromHighSec.sqlite;Version=3;");
+            m_dbConnection_Update.Open();
 
             //Check if killid is already present before adding somehow...!!!!!!
 
@@ -136,27 +153,26 @@ namespace BannedFromHighsec.Controllers
                     "'" + lossEntry.victimShipName + "'" + "," +
                     lossEntry.victimLostIsk +
                     ")";
-                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+                SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection_Update);
                 command.ExecuteNonQuery();
             }
 
-            m_dbConnection.Close();
+            m_dbConnection_Update.Close();
         }
 
         public ActionResult Index()
         {
-            //Create CB if needed
-            CreateDB();
+            //Create CB if needed Never needed as I publish it with DB
+            //CreateDB();
 
             //Update DB
             //UpdateLosses486213795();
 
-            //Select first 20 results and save
+            //Select Last 20 results and save
             string app_data_path = HttpContext.Server.MapPath("~/App_Data/");
             m_dbConnection = new SQLiteConnection("Data Source=" + app_data_path + "BannedFromHighSec.sqlite;Version=3;");
             m_dbConnection.Open();
 
-            //SELECT * FROM Table ORDER BY datetime(datetimeColumn) DESC Limit 1  //For SQL to fetch first x results
             //Lookup ShipName
             string sql = "SELECT * FROM Losses ORDER BY datetime(killTime) DESC Limit 20";
             SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);

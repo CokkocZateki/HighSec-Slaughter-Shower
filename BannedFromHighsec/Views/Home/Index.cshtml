@@ -22,7 +22,7 @@
 
     <div class="row">
 
-        <div class="col-lg-offset-2 col-lg-8">
+        <div class="col-lg-offset-1 col-lg-10">
             <table class="table">
                 <thead>
                     <tr>
@@ -45,7 +45,7 @@
                         <td><a href="@("http://evemaps.dotlan.net/system/" + loss.locationName)"> @loss.locationName </a> </td>
                         <td>@loss.killTime</td>
                         <td><img class="portrait" src="@("http://imageserver.eveonline.com/Render/" + loss.victimShipID + "_32.png")" /> @loss.victimShipName</td>
-        <!--FORMAT-->   <td>@(loss.victimLostIsk + " Isk")</td>
+        <!--FORMAT-->   <td>@(String.Format("{0:N0}", loss.victimLostIsk) + " Isk")</td>
                         <td><a href="@("http://zkillboard.com/kill/" + loss.killID)"> Zkill </a></td>
                     </tr>
                 </tbody>
