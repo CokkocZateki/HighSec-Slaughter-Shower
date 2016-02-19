@@ -59,7 +59,7 @@ namespace BannedFromHighsec.Controllers
 
             eZet.EveLib.ZKillboardModule.ZKillboard ZkillBoard = new eZet.EveLib.ZKillboardModule.ZKillboard();
             eZet.EveLib.ZKillboardModule.ZKillboardOptions ZkillOptions = new eZet.EveLib.ZKillboardModule.ZKillboardOptions();
-            ZkillOptions.PastSeconds = 1200;
+            ZkillOptions.PastSeconds = 1200; //last 20 min
             ZkillOptions.CorporationId.Add(98011392); //Insrt
             ZkillOptions.CorporationId.Add(98224068); //Baers
             //ZkillOptions.AllianceId.Add(99006112); //Friendly Probes
@@ -70,15 +70,15 @@ namespace BannedFromHighsec.Controllers
             var losses = ZkillBoard.GetLosses(ZkillOptions);
             listLosses.AddRange(losses);
 
-            //If we happen to have more than 200 request we walk though the rest pages here. ###### Check if this actually works as intended ######
-            int i = 2;
-            while (losses.Count > 0)
-            {
-                ZkillOptions.Page = i;
-                losses = ZkillBoard.GetLosses(ZkillOptions);
-                listLosses.AddRange(losses);
-                i++;
-            }
+            //If we happen to have more than 200 request we walk though the rest pages here. ###### Never going to happen. Don't think about it ######
+            //int i = 2;
+            //while (losses.Count > 0)
+            //{
+            //    ZkillOptions.Page = i;
+            //    losses = ZkillBoard.GetLosses(ZkillOptions);
+            //    listLosses.AddRange(losses);
+            //    i++;
+            //}
             
             //for (int i = 0; i < 3; i++)
             //{
