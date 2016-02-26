@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Data.SQLite;
+using System.Configuration;
 using BannedFromHighsec.Models;
 
 namespace BannedFromHighsec.Controllers
@@ -59,35 +60,56 @@ namespace BannedFromHighsec.Controllers
 
             eZet.EveLib.ZKillboardModule.ZKillboard ZkillBoard = new eZet.EveLib.ZKillboardModule.ZKillboard();
             eZet.EveLib.ZKillboardModule.ZKillboardOptions ZkillOptions = new eZet.EveLib.ZKillboardModule.ZKillboardOptions();
-            ZkillOptions.PastSeconds = 1200; //last 20 min
-            ZkillOptions.CorporationId.Add(98011392); //Insrt
-            ZkillOptions.CorporationId.Add(98224068); //Baers
+
+            //PastTime to get kills from
+            var pastSeconds = ConfigurationManager.AppSettings["PastSeconds"];
+            ZkillOptions.PastSeconds = Convert.ToInt32(pastSeconds); //last 20 min
+
+            //Add IDs to fetch data from
+            //var corpIDs = ConfigurationManager.AppSettings["CorpID"].ToList();
+            var corpKeys = ConfigurationManager.AppSettings.AllKeys.Where(k => k.StartsWith("CorpID")).Select(p => ConfigurationManager.AppSettings[p]).ToList();
+            var allianceKeys = ConfigurationManager.AppSettings.AllKeys.Where(k => k.StartsWith("AllianceID")).Select(p => ConfigurationManager.AppSettings[p]).ToList();
+
+            var allianceIDs = ConfigurationManager.AppSettings["AllianceID"];
+            List<long> corps = new List<long>();
+            List<long> alliances = new List<long>();
+            foreach (var id in corpKeys)
+            {
+                var tempID = Convert.ToInt64(id);
+                corps.Add(tempID);
+            }
+
+            foreach (var id in allianceKeys)
+            {
+                var tempID = Convert.ToInt64(id);
+                alliances.Add(tempID);
+
+            }
+
+            ZkillOptions.CorporationId = corps;
+            ZkillOptions.AllianceId = alliances;
+            
+            //ZkillOptions.CorporationId.Add(98011392); //Insrt
+            //ZkillOptions.CorporationId.Add(98224068); //Baers
             //ZkillOptions.AllianceId.Add(99006112); //Friendly Probes
             //ZkillOptions.WSpace = false;
 
-            //Cron job runs every 15 min. only get kills for last 20min (20 to add buffer). 
+            //New list for response from Zkillboard
             var listLosses = new List<eZet.EveLib.ZKillboardModule.Models.ZkbResponse.ZkbKill>();
             var losses = ZkillBoard.GetLosses(ZkillOptions);
             listLosses.AddRange(losses);
 
             //If we happen to have more than 200 request we walk though the rest pages here. ###### Never going to happen. Don't think about it ######
-            //int i = 2;
-            //while (losses.Count > 0)
-            //{
-            //    ZkillOptions.Page = i;
-            //    losses = ZkillBoard.GetLosses(ZkillOptions);
-            //    listLosses.AddRange(losses);
-            //    i++;
-            //}
+            int i = 2;
+            while (losses.Count > 0)
+            {
+                ZkillOptions.Page = i;
+                losses = ZkillBoard.GetLosses(ZkillOptions);
+                listLosses.AddRange(losses);
+                i++;
+            }
             
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    ZkillOptions.Page = i;
-            //    var losses = ZkillBoard.GetLosses(ZkillOptions);
-            //    listLosses.AddRange(losses);
-            //}
-
-
+                 
             //Temp list to hold data before db insertion
             var tempLosses = new List<viewLosses>();
 
@@ -139,7 +161,6 @@ namespace BannedFromHighsec.Controllers
             foreach (var lossEntry in tempLosses)
             {
                 var correctTimeformat = string.Format("{0:yyyy-MM-dd HH:mm:ss}", lossEntry.killTime);
-                var test = lossEntry.victimName.Replace("'", "''");
                 string sql = "insert into Losses" +
                     "(killID, killTime, victimID, victimName, locationID, locationName, victimShipID, victimShipName, victimLostIsk)" + 
                     "Values" + 
@@ -150,7 +171,7 @@ namespace BannedFromHighsec.Controllers
                     lossEntry.locationID + "," + 
                     "'" + lossEntry.locationName + "'" + "," +
                     lossEntry.victimShipID + "," +
-                    "'" + lossEntry.victimShipName + "'" + "," +
+                    "'" + lossEntry.victimShipName.Replace("'", "''") + "'" + "," +
                     lossEntry.victimLostIsk +
                     ")";
                 SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection_Update);
